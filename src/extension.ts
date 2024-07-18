@@ -1,26 +1,123 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+let totalActiveMinutes = 0;
+let lastActivityTime: Date | null = null;
+let activeTimeInterval: NodeJS.Timeout | null = null;
+let inactivityCheckInterval: NodeJS.Timeout | null = null;
+let statusBarItem: vscode.StatusBarItem;
+let isTracking = false;
+let secondsCounter = 0;
+
+const INACTIVITY_THRESHOLD = 5000; // 5 seconds in milliseconds
+const API_ENDPOINT = 'http://localhost:8080/activities'; // Replace with your actual endpoint
+
 export function activate(context: vscode.ExtensionContext) {
+    console.log('Extension "habittrackerfordevs" is now active!');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "habittrackerfordevs" is now active!');
+    statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    context.subscriptions.push(statusBarItem);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('habittrackerfordevs.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from HabitTrackerForDevs!');
-	});
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeTextDocument(() => updateActivityTime()),
+        vscode.window.onDidChangeTextEditorSelection(() => updateActivityTime()),
+        vscode.window.onDidChangeWindowState((e) => {
+            if (e.focused) {
+                updateActivityTime();
+            }
+        })
+    );
 
-	context.subscriptions.push(disposable);
+    startInactivityCheck();
+    updateActivityTime();
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+function updateActivityTime() {
+    lastActivityTime = new Date();
+    if (!isTracking) {
+        startTracking();
+    }
+}
+
+function startTracking() {
+    isTracking = true;
+    vscode.window.showInformationMessage('Habit Tracker activated! Start coding!');
+    
+    if (!activeTimeInterval) {
+        activeTimeInterval = setInterval(() => {
+            secondsCounter++;
+            if (secondsCounter === 60) {
+                totalActiveMinutes++;
+                secondsCounter = 0;
+            }
+            updateStatusBar();
+        }, 1000);
+    }
+}
+
+async function stopTracking() {
+    isTracking = false;
+    if (activeTimeInterval) {
+        clearInterval(activeTimeInterval);
+        activeTimeInterval = null;
+    }
+    vscode.window.showInformationMessage('Habit Tracker paused due to inactivity.');
+    
+    // Send API call only if there are minutes to report
+    if (totalActiveMinutes > 0) {
+        try {
+            const response = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "user_id": 2,
+                    "activity_name": "projectExtension",
+                    "duration": totalActiveMinutes, // Send only whole minutes
+                    "date": new Date().toISOString().split('T')[0] // Current date in YYYY-MM-DD format
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            console.log('Successfully sent tracking data to API');
+            totalActiveMinutes = 0; // Reset after successful send
+            secondsCounter = 0;
+        } catch (error) {
+            console.error('Failed to send tracking data to API:', error);
+            vscode.window.showErrorMessage('Failed to send tracking data to API:'+ error + JSON.stringify(error));
+        }
+    }
+}
+
+function updateStatusBar() {
+    statusBarItem.text = `Active Time: ${totalActiveMinutes}m ${secondsCounter}s`;
+    statusBarItem.show();
+}
+
+function startInactivityCheck() {
+    if (!inactivityCheckInterval) {
+        inactivityCheckInterval = setInterval(() => {
+            if (lastActivityTime && new Date().getTime() - lastActivityTime.getTime() > INACTIVITY_THRESHOLD) {
+                if (isTracking) {
+                    stopTracking();
+                }
+            } else if (!isTracking && lastActivityTime) {
+                startTracking();
+            }
+        }, 1000);
+    }
+}
+
+export function deactivate() {
+    if (activeTimeInterval) {
+        clearInterval(activeTimeInterval);
+    }
+    if (inactivityCheckInterval) {
+        clearInterval(inactivityCheckInterval);
+    }
+    statusBarItem.hide();
+    vscode.window.showInformationMessage(`Habit Tracker deactivated. Total active time: ${totalActiveMinutes}m`);
+}
