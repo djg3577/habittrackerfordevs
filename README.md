@@ -50,6 +50,6 @@ Initial release of Habit Tracker for Devs:
 
 ## Feedback and Contributions
 
-If you have any feedback or would like to contribute to the development of this extension, please visit our [GitHub repository](https://github.com/yourusername/habittrackerfordevs).
+If you have any feedback or would like to contribute to the development of this extension, please visit our [GitHub repository](https://github.com/djg3577/habittrackerfordevs).
 
 **Enjoy tracking your coding habits!**
