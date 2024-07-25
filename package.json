@@ -18,6 +18,10 @@
       {
         "command": "habittrackerfordevs.showActiveTime",
         "title": "Show Active Time"
+      },
+      {
+        "command": "habittrackerfordevs.changeActivityName",
+        "title": "Change Activity Name"
       }
     ]
   },
