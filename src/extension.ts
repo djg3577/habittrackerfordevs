@@ -11,28 +11,17 @@ let authToken: string | null = null;
 let currentActivityName: string = "Coding";
 
 const INACTIVITY_THRESHOLD = 60 * 1000; // 1 minute
-const API_ENDPOINT = "http://localhost:8080/activities"; // Replace with your actual endpoint
+const API_ENDPOINT = "http://localhost:8080/activities";
 
 export async function activate(context: vscode.ExtensionContext) {
-  console.log('Extension "habittrackerfordevs" is now active!');
-
-  // Attempt to get GitHub authentication
-  try {
-    const session = await vscode.authentication.getSession(
-      "github",
-      ["user:email"],
-      { createIfNone: true }
-    );
-    if (session) {
-      authToken = session.accessToken;
-      console.log("Successfully authenticated with GitHub");
-    } else {
-      console.log("No existing GitHub session found");
-    }
-  } catch (err) {
-    console.error("Failed to get GitHub session:", err);
+  const session = await vscode.authentication.getSession(
+    "github",
+    ["user:email"],
+    { createIfNone: true }
+  );
+  if (session) {
+    authToken = session.accessToken;
   }
-
   statusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     100
@@ -109,47 +98,38 @@ async function stopTracking() {
   );
 
   if (totalActiveMinutes > 0) {
-    try {
-      if (!authToken) {
-        // If no auth token, try to get one
-        const session = await vscode.authentication.getSession(
-          "github",
-          ["user:email"],
-          { createIfNone: true }
-        );
-        if (session) {
-          authToken = session.accessToken;
-        } else {
-          throw new Error("Unable to authenticate with GitHub");
-        }
-      }
-
-      const response = await fetch(API_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({
-          activity_name: currentActivityName,
-          duration: totalActiveMinutes,
-          date: new Date().toISOString().split("T")[0],
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      console.log("Successfully sent tracking data to API");
-      totalActiveMinutes = 0;
-      secondsCounter = 0;
-    } catch (error) {
-      console.error("Failed to send tracking data to API:", error);
-      vscode.window.showErrorMessage(
-        "Failed to send tracking data to API: " + error
+    if (!authToken) {
+      const session = await vscode.authentication.getSession(
+        "github",
+        ["user:email"],
+        { createIfNone: true }
       );
+      if (session) {
+        authToken = session.accessToken;
+      } else {
+        throw new Error("Unable to authenticate with GitHub");
+      }
     }
+
+    const response = await fetch(API_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({
+        activity_name: currentActivityName,
+        duration: totalActiveMinutes,
+        date: new Date().toISOString().split("T")[0],
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    totalActiveMinutes = 0;
+    secondsCounter = 0;
   }
 }
 

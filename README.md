@@ -1,71 +1,55 @@
-# habittrackerfordevs README
+# Habit Tracker for Devs
 
-This is the README for your extension "habittrackerfordevs". After writing up a brief description, we recommend including the following sections.
+Habit Tracker for Devs is a VS Code extension that helps developers track their coding time and activities, promoting better time management and productivity.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Automatic Time Tracking**: The extension automatically tracks your active coding time in VS Code.
+- **Activity Naming**: Easily name or change your current coding activity directly from the status bar.
+- **Inactivity Detection**: Automatically pauses tracking after 1 minute of inactivity.
+- **Status Bar Integration**: View your current activity and coding time directly in the VS Code status bar.
+- **GitHub Authentication**: Securely authenticate using your GitHub account.
+- **API Integration**: Automatically sends your activity data to a specified API endpoint.
 
-For example if there is an image subfolder under your extension project workspace:
+## How It Works
 
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+1. The extension starts tracking your coding time as soon as you begin working in VS Code.
+2. Your current activity and coding time are displayed in the status bar.
+3. Click on the status bar item to change your current activity name.
+4. If you're inactive for 1 minute, the tracker pauses automatically.
+5. Resume coding, and the tracker starts again.
+6. When you stop coding or VS Code is closed, your activity data is sent to the specified API.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Visual Studio Code version 1.60.0 or higher
+- A GitHub account for authentication
+- Internet connection for API data submission
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+This extension doesn't currently add any VS Code settings.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- The API endpoint is currently hardcoded. In future versions, this will be configurable.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+Initial release of Habit Tracker for Devs:
+- Automatic time tracking
+- Activity naming
+- Inactivity detection
+- Status bar integration
+- GitHub authentication
+- API integration
 
 ---
 
-## Following extension guidelines
+## Feedback and Contributions
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+If you have any feedback or would like to contribute to the development of this extension, please visit our [GitHub repository](https://github.com/yourusername/habittrackerfordevs).
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+**Enjoy tracking your coding habits!**
