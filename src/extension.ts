@@ -8,11 +8,11 @@ let statusBarItem: vscode.StatusBarItem;
 let isTracking = false;
 let secondsCounter = 0;
 let authToken: string | null = null;
-let currentActivityName: string = "Coding";
+let previousActivityName: string | undefined;
+let currentActivityName: string = previousActivityName || "Coding";
 
-const INACTIVITY_THRESHOLD = 60 * 1000; // 1 minute
+const INACTIVITY_THRESHOLD = 1000 * 60; // 1 minute is 60*1000 milliseconds
 const API_ENDPOINT = "http://localhost:8080/activities";
-
 export async function activate(context: vscode.ExtensionContext) {
   const session = await vscode.authentication.getSession(
     "github",
@@ -46,7 +46,7 @@ export async function activate(context: vscode.ExtensionContext) {
           placeHolder: "Enter activity name",
           value: currentActivityName,
         });
-
+        previousActivityName = newActivityName;
         if (newActivityName) {
           currentActivityName = newActivityName;
           updateStatusBar();
@@ -106,8 +106,6 @@ async function stopTracking() {
       );
       if (session) {
         authToken = session.accessToken;
-      } else {
-        throw new Error("Unable to authenticate with GitHub");
       }
     }
 
@@ -136,7 +134,9 @@ async function stopTracking() {
 function updateStatusBar() {
   statusBarItem.text = `${currentActivityName}: ${totalActiveMinutes}m ${secondsCounter}s`;
   statusBarItem.tooltip = "Click to change activity name";
+  if(currentActivityName === "Coding") {
   statusBarItem.command = "habittrackerfordevs.changeActivityName";
+  }
   statusBarItem.show();
 }
 
@@ -155,17 +155,4 @@ function startInactivityCheck() {
       }
     }, 1000);
   }
-}
-
-export function deactivate() {
-  if (activeTimeInterval) {
-    clearInterval(activeTimeInterval);
-  }
-  if (inactivityCheckInterval) {
-    clearInterval(inactivityCheckInterval);
-  }
-  statusBarItem.hide();
-  vscode.window.showInformationMessage(
-    `Habit Tracker deactivated. Total active time: ${totalActiveMinutes}m`
-  );
 }

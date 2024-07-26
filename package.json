@@ -2,6 +2,7 @@
   "name": "habittrackerfordevs",
   "displayName": "HabitTrackerForDevs",
   "description": "Track your vscode Time!",
+  "publisher": "DanielGuillen",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.91.0"
@@ -54,5 +55,9 @@
   },
   "dependencies": {
     "node-fetch": "^2.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/djg3577/habittrackerfordevs"
   }
 }
