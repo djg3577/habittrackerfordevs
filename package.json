@@ -3,7 +3,8 @@
   "displayName": "HabitTrackerForDevs",
   "description": "Track your vscode Time!",
   "publisher": "DanielGuillen",
-  "version": "0.0.2",
+  "icon": "logo_extension.png",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.91.0"
   },
