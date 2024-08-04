@@ -12,7 +12,7 @@ let previousActivityName: string | undefined;
 let currentActivityName: string = previousActivityName || "Coding";
 
 const INACTIVITY_THRESHOLD = 1000 * 60; // 1 minute is 60*1000 milliseconds
-const API_ENDPOINT = "http://localhost:8080/activities";
+const API_ENDPOINT = "https://habittrackerfordevs.com/activities";
 export async function activate(context: vscode.ExtensionContext) {
   const session = await vscode.authentication.getSession(
     "github",
