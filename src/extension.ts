@@ -71,9 +71,6 @@ function updateActivityTime() {
 
 function startTracking() {
   isTracking = true;
-  vscode.window.showInformationMessage(
-    `Habit Tracker activated! Start coding on: ${currentActivityName}`
-  );
 
   if (!activeTimeInterval) {
     activeTimeInterval = setInterval(() => {
@@ -93,10 +90,6 @@ async function stopTracking() {
     clearInterval(activeTimeInterval);
     activeTimeInterval = null;
   }
-  vscode.window.showInformationMessage(
-    "Habit Tracker paused due to inactivity."
-  );
-
   if (totalActiveMinutes > 0) {
     if (!authToken) {
       const session = await vscode.authentication.getSession(
