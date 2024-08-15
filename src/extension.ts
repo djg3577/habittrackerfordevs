@@ -1,4 +1,6 @@
 import * as vscode from "vscode";
+import * as fs from "fs";
+import * as path from "path";
 
 let totalActiveMinutes = 0;
 let lastActivityTime: Date | null = null;
@@ -13,6 +15,7 @@ let currentActivityName: string = previousActivityName || "Coding";
 
 const INACTIVITY_THRESHOLD = 1000 * 60; // 1 minute is 60*1000 milliseconds
 const API_ENDPOINT = "https://habittrackerfordevs.com/api/activities";
+
 export async function activate(context: vscode.ExtensionContext) {
   const session = await vscode.authentication.getSession(
     "github",
@@ -57,6 +60,17 @@ export async function activate(context: vscode.ExtensionContext) {
       }
     )
   );
+
+  let disposable = vscode.commands.registerCommand('extension.commitAndPush', async () => {
+    try {
+        await commitAndPush();
+        vscode.window.showInformationMessage('Successfully committed and pushed changes.');
+    } catch (error) {
+        vscode.window.showErrorMessage(`Failed to commit and push: ${error instanceof Error ? error.message : String(error)}`);
+    }
+});
+
+context.subscriptions.push(disposable);
 
   startInactivityCheck();
   updateActivityTime();
@@ -118,6 +132,13 @@ async function stopTracking() {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+    
+    try {
+      await commitAndPush();
+      vscode.window.showInformationMessage('Successfully committed and pushed changes.');
+    } catch (error) {
+      vscode.window.showErrorMessage(`Failed to commit and push: ${error instanceof Error ? error.message : String(error)}`);
+    }
 
     totalActiveMinutes = 0;
     secondsCounter = 0;
@@ -127,8 +148,8 @@ async function stopTracking() {
 function updateStatusBar() {
   statusBarItem.text = `${currentActivityName}: ${totalActiveMinutes}m ${secondsCounter}s`;
   statusBarItem.tooltip = "Click to change activity name";
-  if(currentActivityName === "Coding") {
-  statusBarItem.command = "habittrackerfordevs.changeActivityName";
+  if (currentActivityName === "Coding") {
+    statusBarItem.command = "habittrackerfordevs.changeActivityName";
   }
   statusBarItem.show();
 }
@@ -147,5 +168,62 @@ function startInactivityCheck() {
         startTracking();
       }
     }, 1000);
+  }
+}
+
+async function commitAndPush() {
+  console.log('Starting commitAndPush function');
+
+  try {
+      const gitExtension = vscode.extensions.getExtension('vscode.git');
+      if (!gitExtension) {
+          throw new Error('Git extension not found');
+      }
+      console.log('Git extension found');
+
+      const git = gitExtension.exports.getAPI(1);
+      console.log('Git API version:', git.version);
+
+      const repos = git.repositories;
+      console.log('Number of repositories found:', repos.length);
+
+      if (repos.length === 0) {
+          throw new Error('No Git repository found in the current workspace');
+      }
+
+      const repo = repos[0];
+      console.log('Using repository:', repo.rootUri.fsPath);
+
+      // Ensure we're in a valid Git repository
+      if (!repo.rootUri) {
+          throw new Error('Invalid repository: rootUri is undefined');
+      }
+
+      // Stage all changes
+      console.log('Staging changes');
+      await repo.add([repo.rootUri.fsPath]);
+
+      // Check if there are changes to commit
+      if (repo.state.workingTreeChanges.length === 0 && repo.state.indexChanges.length === 0) {
+          throw new Error('No changes to commit');
+      }
+
+      // Create commit message
+      const commitMessage = `Update activity log: ${currentActivityName} for ${totalActiveMinutes} minutes`;
+      console.log(`Using commit message: ${commitMessage}`);
+
+      // Commit
+      console.log('Committing changes');
+      const commitResult = await repo.commit(commitMessage);
+      console.log('Commit result:', commitResult);
+
+      // Push
+      console.log('Pushing changes');
+      const pushResult = await repo.push();
+      console.log('Push result:', pushResult);
+
+  } catch (error) {
+      console.error('Error in commitAndPush:', error);
+      throw error; // Re-throw the error to be caught by the command handler
   }
 }

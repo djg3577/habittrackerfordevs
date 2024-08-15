@@ -24,6 +24,10 @@
       {
         "command": "habittrackerfordevs.changeActivityName",
         "title": "Change Activity Name"
+      },
+      {
+        "command": "extension.commitAndPush",
+        "title": "Commit and Push Changes"
       }
     ]
   },
@@ -55,7 +59,9 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "node-fetch": "^2.7.0"
+    "install": "^0.13.0",
+    "node-fetch": "^2.7.0",
+    "npm": "^10.8.2"
   },
   "repository": {
     "type": "git",
