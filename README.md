@@ -22,6 +22,3 @@
 
 
 
-# STRIVE Frontend
-
-This is the frontend repo for the STRIVE app, which tracks daily coding time and logs it, and includes a leaderboard of all users!
